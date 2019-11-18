@@ -37,7 +37,21 @@ Log4js.AjaxAppender = function (loggingUrl) {
      */
     this.threshold = 1;
 
-    /**
+		/**
+		 * Timeout after which queued events are sent even if threshold hasn't been met. Undefined means no timeout.
+		 * @type Integer
+		 * @private
+		 */
+		this.thresholdTimeout = undefined;
+
+		/**
+		 * The timeout ID of the setTimeout call to send events after thresholdTimeout.
+		 * @type Integer
+		 * @private
+		 */
+		this.thresholdTimeoutId = undefined;
+
+		/**
      * timeout when request is aborted.
      * @private
      */
@@ -71,11 +85,28 @@ Log4js.AjaxAppender.prototype = Log4js.extend(new Log4js.Appender(), /** @lends 
     doAppend: function (loggingEvent) {
         log4jsLogger && log4jsLogger.trace("> AjaxAppender.append");
 
+				if (this.thresholdTimeoutId !== undefined) {
+						clearTimeout(this.thresholdTimeoutId);
+						this.thresholdTimeoutId = undefined;
+				}
+
         if (this.loggingEventMap.length() <= this.threshold || this.isInProgress === true) {
             this.loggingEventMap.push(loggingEvent);
+
+						if (this.thresholdTimeout !== undefined && this.isInProgress === false) {
+								var appender = this;
+								this.thresholdTimeoutId = setTimeout(function() {
+										appender.thresholdTimeoutId = undefined;
+										appender.send();
+								}, this.thresholdTimeout);
+						}
         }
 
         if (this.loggingEventMap.length() >= this.threshold && this.isInProgress === false) {
+        		if (this.thresholdTimeoutId !== undefined) {
+								clearTimeout(this.thresholdTimeoutId);
+								this.thresholdTimeoutId = undefined;
+						}
             //if threshold is reached send the events and reset current threshold
             this.send();
         }
@@ -99,6 +130,15 @@ Log4js.AjaxAppender.prototype = Log4js.extend(new Log4js.Appender(), /** @lends 
         this.threshold = threshold;
         log4jsLogger && log4jsLogger.trace("< AjaxAppender.setThreshold");
     },
+		/**
+		 * Set the threshold when logs have to be send. Default threshold is 1.
+		 * @praram {int} threshold new threshold
+		 */
+		setThresholdTimeout: function (thresholdTimeout) {
+				log4jsLogger && log4jsLogger.trace("> AjaxAppender.setThresholdTimeout: " + thresholdTimeout);
+				this.thresholdTimeout = thresholdTimeout;
+				log4jsLogger && log4jsLogger.trace("< AjaxAppender.setThresholdTimeout");
+		},
     /**
      * Set the timeout in milli seconds until sending request is aborted.
      * Default is 2000 ms.
@@ -111,6 +151,10 @@ Log4js.AjaxAppender.prototype = Log4js.extend(new Log4js.Appender(), /** @lends 
      * send the request.
      */
     send: function () {
+    		if (this.thresholdTimeoutId !== undefined) {
+						clearTimeout(this.thresholdTimeoutId);
+						this.thresholdTimeoutId = undefined;
+				}
         if (this.loggingEventMap.length() > 0) {
 
             log4jsLogger && log4jsLogger.trace("> AjaxAppender.send");
