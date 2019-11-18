@@ -43,9 +43,10 @@ Log4js.DateFormatter.prototype = {
 	  var vHour  = this.addZero(vDate.getHours());
 	  var vMinute = this.addZero(vDate.getMinutes());
 	  var vSecond = this.addZero(vDate.getSeconds());
+	  var vMilli = this.addZeroHundreds(vDate.getMilliseconds());
 	  var vTimeZone = this.O(vDate);
 	  var vDateString = vFormat.replace(/dd/g, vDay).replace(/MM/g, vMonth).replace(/y{1,4}/g, vYear);
-	  vDateString = vDateString.replace(/hh/g, vHour).replace(/mm/g, vMinute).replace(/ss/g, vSecond);
+	  vDateString = vDateString.replace(/hh/g, vHour).replace(/mm/g, vMinute).replace(/ss/g, vSecond).replace(/fff/g, vMilli);
 	  vDateString = vDateString.replace(/O/g, vTimeZone);
 	  return vDateString;
 	},
@@ -73,8 +74,9 @@ Log4js.DateFormatter.prototype = {
 		var vHour	 = this.addZero(vDate.getUTCHours());
 		var vMinute = this.addZero(vDate.getUTCMinutes());
 		var vSecond = this.addZero(vDate.getUTCSeconds());
+		var vMilli = this.addZeroHundreds(vDate.getMilliseconds());
 		var vDateString = vFormat.replace(/dd/g, vDay).replace(/MM/g, vMonth).replace(/y{1,4}/g, vYear);
-		vDateString = vDateString.replace(/hh/g, vHour).replace(/mm/g, vMinute).replace(/ss/g, vSecond);
+		vDateString = vDateString.replace(/hh/g, vHour).replace(/mm/g, vMinute).replace(/ss/g, vSecond).replace(/fff/g, vMilli);
 		return vDateString;
 	},
 
@@ -84,6 +86,14 @@ Log4js.DateFormatter.prototype = {
 	 */
 	addZero : function(vNumber) {
 	  return ((vNumber < 10) ? "0" : "") + vNumber;
+	},
+
+	/**
+	 * @private
+	 * @static
+	 */
+	addZeroHundreds : function(vNumber) {
+		return ((vNumber < 10) ? "00" : (vNumber < 100) ? "0" : "") + vNumber;
 	},
 
 	/**

@@ -33,18 +33,18 @@ Log4js.JSONLayout.prototype = Log4js.extend(new Log4js.Layout(), /** @lends Log4
 			referer = "unknown";
 		}
 		
-		var jsonString = "{\n \"LoggingEvent\": {\n";
+		var jsonString = "{\n";
 		
-		jsonString += "\t\"logger\": \"" +  loggingEvent.categoryName + "\",\n";
-		jsonString += "\t\"level\": \"" +  loggingEvent.level.toString() + "\",\n";
+		jsonString += "\t\"categoryName\": \"" +  loggingEvent.categoryName + "\",\n";
+		jsonString += "\t\"logLevel\": \"" +  loggingEvent.level.toString() + "\",\n";
 		jsonString += this.formatMessage(loggingEvent.message);
 		jsonString += "\t\"referer\": \"" + referer + "\",\n"; 
-		jsonString += "\t\"useragent\": \"" + useragent + "\",\n"; 
-		jsonString += "\t\"timestamp\": \"" +  this.df.formatUTCDate(loggingEvent.startTime, "yyyy-MM-ddThh:mm:ssZ") + "\",\n";
+		jsonString += "\t\"userAgent\": \"" + useragent + "\",\n";
+		jsonString += "\t\"timestamp\": \"" +  this.df.formatUTCDate(loggingEvent.startTime, "yyyy-MM-ddThh:mm:ss.fffZ") + "\",\n";
 		jsonString += "\t\"exception\": \"" +  loggingEvent.exception + "\"\n"; 
-		jsonString += "}}";      
+		jsonString += "}";
         
-        return jsonString;
+		return jsonString;
 	},
 
   /**
@@ -62,7 +62,7 @@ Log4js.JSONLayout.prototype = Log4js.extend(new Log4js.Layout(), /** @lends Log4
         if(property == "message") continue;
         var val = message[property];
         if(val instanceof Date)
-          stream += "\t\"" + property + "_dt\": \"" + this.df.formatUTCDate(val, "yyyy-MM-ddThh:mm:ssZ") + "\",\n";
+          stream += "\t\"" + property + "_dt\": \"" + this.df.formatUTCDate(val, "yyyy-MM-ddThh:mm:ss.fffZ") + "\",\n";
         else {
           switch(typeof val) {
           case "string":
